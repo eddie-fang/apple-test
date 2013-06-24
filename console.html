@@ -1,0 +1,969 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+	  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+	  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+		<script src="http://code.highcharts.com/stock/highstock.js"></script>
+		<script src="http://code.highcharts.com/stock/modules/exporting.js"></script>
+		<style type="text/css" title="currentStyle">
+			@import "http://www.datatables.net/release-datatables/media/css/demo_page.css";
+			@import "http://www.datatables.net/release-datatables/media/css/demo_table.css";
+		</style>
+		<script type="text/javascript" language="javascript" src="http://www.datatables.net/release-datatables/media/js/jquery.dataTables.js"></script>
+		<link rel="stylesheet" type="text/css" href="console.css" />
+		<script>
+		  currentSlide = 0;
+		  $(function() {
+		    $( "#time-tabs" ).buttonset();
+		    $( "#display-tabs" ).buttonset();
+		    $('.slide-block').each(function(index){
+		    	var color = index % 2 == 0 ? 'white' : '#EFF2FB';
+		    	$(this).css('background-color', color);
+		    });
+		    $("#left-arrow").click(function(){
+		    	if (currentSlide == 0) return;
+				$(".scroll-wrapper").animate(
+					{
+						"left": (--currentSlide) * -600},
+					{
+		                duration: 'slow',
+		                easing: 'easeInQuad'
+		            }
+		        );
+		    });
+		    $("#right-arrow").click(function(){
+		    	if (currentSlide == 1) return;
+				$(".scroll-wrapper").animate(
+					{
+						"left": (++currentSlide) * -600},
+					{
+		                duration: 'slow',
+		                easing: 'easeInQuad'
+		            }
+		        );
+		    });
+
+		    $('.cancel-button').click(function(){
+		    	$(this).parent().remove();
+		    })
+
+		    $('.cancel-2-button').click(function(){
+		    	$(this).parent().parent().parent().remove();
+		    })
+
+		    $('.criteria').click(function(){
+		    	$('.criteria').removeClass('criteria-selected');
+
+		    	$(this).addClass('criteria-selected');
+		    })
+
+		    var chartData = [];
+		    var tableData = [];
+		    var xlabels = [];
+
+/*
+		    [
+		            [ 1, "test", 5030000, 40500000]
+		        ]*/
+
+		    for (var i = 0; i < fileData.length; i++)
+		    {
+		    	var printerData = {};
+		    	printerData.name = fileData[i]['name'];
+		    	printerData.data = [];
+
+		    	var sumData = [];
+		    	sumData[0] = '1';
+		    	sumData[1] = printerData.name;	
+		    	sumData[2] = 0;	    	
+	    		sumData[3] = 0;	    	
+
+		    	var count = 1;
+		    	var sum = 0;
+		    	for (var j in fileData[i]['sales-data'])
+		    	{		    		
+		    		sum += fileData[i]['sales-data'][j];
+		    		if (count % 7 == 0)
+		    		{
+		    			var tmpDate = new Date(j);
+		    			xlabels[xlabels.length] = j;
+						printerData.data[printerData.data.length] = sum;	
+						sum = 0;
+		    		}
+
+		    		count++;
+		    	}
+
+		    	for (var j in fileData[i]['sales-data'])
+		    	{
+		    		sumData[2] += fileData[i]['sales-data'][j];	
+		    		sumData[3] += fileData[i]['sales-data'][j];	
+		    	}
+
+		    	chartData[chartData.length] = printerData;
+		    	tableData[tableData.length] = sumData;
+		    }
+
+			tableData.sort(function(a,b){
+				return b[3]-a[3];
+			});
+		    
+		    for (var i = 0; i < tableData.length; i++)
+		    {
+		    	tableData[i][0] = i + 1;
+		    }
+
+		    $('#container').highcharts({
+	            chart: {
+	                type: 'column'
+	            },
+	            title: {
+	                text: ''
+	            },
+	            xAxis: {
+	                categories: xlabels
+	            },
+	            yAxis: {
+	                min: 0,
+	                title: {
+	                    text: ''
+	                },
+	                stackLabels: {
+	                    enabled: true,
+	                    style: {
+	                        fontWeight: 'bold',
+	                        color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+	                    }
+	                }
+	            },
+	            legend: {
+	                align: 'right',
+	                x: -100,
+	                verticalAlign: 'top',
+	                y: 20,
+	                floating: true,
+	                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColorSolid) || 'white',
+	                borderColor: '#CCC',
+	                borderWidth: 1,
+	                shadow: false
+	            },
+	            tooltip: {
+	                formatter: function() {
+	                    return '<b>'+ this.x +'</b><br/>'+
+	                        this.series.name +': '+ this.y +'<br/>'+
+	                        'Total: '+ this.point.stackTotal;
+	                }
+	            },
+	            plotOptions: {
+	                column: {
+	                    stacking: 'normal',
+	                    dataLabels: {
+	                        enabled: true,
+	                        color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+	                    }
+	                }
+	            },
+	            series: chartData
+	        });
+
+			$('.criteria-search').keyup(function(event){
+				if (event.keyCode == '13') {
+					$(this).next().append(
+						$('<div class="row">' +
+							'<div class="cell">' +
+							'<div class="cancel-2-button"></div>' +
+							'</div>' + 
+							'<div class="cell criteria-content" >' + $(this).val() + '</div>' +
+							'</div>'));
+					$(this).val('');
+				}
+			});
+
+			$('#table').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="datatable"></table>' );
+		    $('#datatable').dataTable( {
+		    	"bPaginate": false,
+		        "bLengthChange": false,
+		        "bFilter": false,
+		        "bSort": true,
+		        "bInfo": false,
+		        "bAutoWidth": false,
+		        "aaData": tableData,
+		        "aoColumns": [
+		            { "sTitle": "Rank", "sClass": "center" },
+		            { "sTitle": "Item Name", "sClass": "center" },
+		            { "sTitle": "Month to Date total", "sClass": "right" },
+		            { "sTitle": "Year to Date total", "sClass": "right" },
+		        ]
+		    } );   
+		  });
+		</script>
+	</head>
+	<body>
+		<div class="header table">
+			<div class="row global-header">
+				<div class="cell logo">
+					<div class="logo-image"></div>
+				</div>
+				<div class="cell global-name">
+					iTunes Data Services
+				</div>
+				<div class="cell">
+				</div>
+				<div class="cell username" align="right">
+					Rodolfo Chavez
+				</div>
+			</div>
+		</div>
+		<div class="table header top-tabs">
+			<div class="row">
+				<div class="cell top-tab">
+					Reports
+				</div>
+				<div class="cell top-tab tab-selected">
+					Query
+				</div>
+				<div class="cell top-tab">
+					Visualization
+				</div>
+				<div class="cell top-tab">
+					Other Data
+				</div>
+				<div class="cell">
+					&nbsp;
+				</div>
+			</div>
+		</div>
+		<div class="table header date-filter">
+			<div class="row">
+				<div class="cell" style="vertical-align: top;">
+					<div class="table">
+						<div class="row">
+							<div class="cell" style="vertical-align:top;">
+								<div class="table">
+									<div class="row">
+										<div class="cell criteria-label">Date </div>
+										<div class="cell date-title">Aug 1 - Sep 17, 2012</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="cell">
+								<div id="time-tabs">
+								    <input type="radio" id="radio1" name="radio" /><label for="radio1">Day</label>
+								    <input type="radio" id="radio2" name="radio" checked="checked" /><label for="radio2">Week</label>
+								    <input type="radio" id="radio3" name="radio" /><label for="radio3">Month</label>
+								    <input type="radio" id="radio4" name="radio" /><label for="radio4">Quarter</label>
+								    <input type="radio" id="radio5" name="radio" /><label for="radio5">Year</label>
+								  </div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="cell">
+					<div class="table">
+						<div class="row">
+							<div id="left-arrow" class="cell">
+							</div>
+							<div class="cell">
+								<div id="scroll">
+									<div id="contentbox" class="scroll-wrapper">
+										<div id="slide1" num="1" class="slide">
+											<div class="table">
+												<div class="row">
+													<div class="cell">
+														<div class="slide-block"></div>
+														<div class="slide-date">2013-01-07</div>
+													</div>
+													<div class="cell">
+														<div class="slide-block"></div>
+														<div class="slide-date">2013-01-14</div>
+													</div>
+													<div class="cell">
+														<div class="slide-block"></div>
+														<div class="slide-date">2013-01-21</div>
+													</div>
+													<div class="cell">
+														<div class="slide-block"></div>
+														<div class="slide-date">2013-01-28</div>
+													</div>
+													<div class="cell">
+														<div class="slide-block"></div>
+														<div class="slide-date">2013-02-04</div>
+													</div>
+													<div class="cell">
+														<div class="slide-block"></div>
+														<div class="slide-date">2013-02-11</div>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div id="slide2" num="2" class="slide">
+											<div class="table">
+												<div class="row">
+													<div class="cell">
+														<div class="slide-block"></div>
+														<div class="slide-date">2013-02-18</div>
+													</div>
+													<div class="cell">
+														<div class="slide-block"></div>
+														<div class="slide-date">2013-02-25</div>
+													</div>
+													<div class="cell">
+														<div class="slide-block"></div>
+														<div class="slide-date">2013-03-04</div>
+													</div>
+													<div class="cell">
+														<div class="slide-block"></div>
+														<div class="slide-date">2013-03-11</div>
+													</div>
+													<div class="cell">
+														<div class="slide-block"></div>
+														<div class="slide-date">2013-03-18</div>
+													</div>
+													<div class="cell">
+														<div class="slide-block"></div>
+														<div class="slide-date">2013-03-25</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>			
+								</div>	
+							</div>
+							<div id="right-arrow" class="cell">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="table header">
+			<div class="row">
+				<div class="cell left-pane" style="vertical-align:top;">
+					<div class="criteria-label">Display</div>
+					<div id="display-tabs">
+					    <input type="radio" id="d1" name="radio2" /><label for="d1">Units</label>
+					    <input type="radio" id="d2" name="radio2" checked="checked" /><label for="d2">Billings #1</label>
+					    <input type="radio" id="d3" name="radio2" /><label for="d3">Billings #2</label>
+					  </div>
+					<div class="table header">
+						<div class="row">
+							<div class="cell">
+								<span class="criteria-label">Filters
+								</span>
+								<select class="filter-select">
+									<option value="addFilter">Add Filter</option>
+								</select>
+							</div>
+						</div>
+						<div class="row">
+							<div class="cell">
+								<div class="filter-item">
+									<div class="filter-item-text">Paid Content</div>
+									<div class="cancel-button"></div>
+								</div>
+								<div class="filter-item">
+									<div class="filter-item-text">Volume Purchase (Educational)</div>
+									<div class="cancel-button"></div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="cell content-types criteria criteria-selected">
+								<div class="criteria-title">Content Type</div>
+								<div class="group-by">Group by</div>													<div class="table criteria-table">
+									<div class="criteria-table-header">
+										<div class="cell criteria-header">
+											All
+										</div>
+										<div class="cell criteria-header">
+											&nbsp;
+										</div>
+									</div>
+									<div class="row">
+										<div class="cell">
+											<input type="checkbox" checked/>
+										</div>
+										<div class="cell">
+											<div>Apps</div>
+										</div>
+									</div>
+									<div class="row criteria-row-event">
+										<div class="cell">
+											<input type="checkbox"/>
+										</div>
+										<div class="cell">
+											<div>Music</div>
+										</div>
+									</div>	
+									<div class="row">
+										<div class="cell">
+											<input type="checkbox" checked/>
+										</div>
+										<div class="cell">
+											<div>Movies</div>
+										</div>
+									</div>	
+									<div class="row criteria-row-event">
+										<div class="cell">
+											<input type="checkbox"/>
+										</div>
+										<div class="cell">
+											<div>TV</div>
+										</div>
+									</div>								
+								</div>
+							</div>
+							
+						</div>
+						<div class="row">
+							<div class="cell content-types criteria">
+								<div class="criteria-title">Country/Region</div>
+
+								<div class="group-by">Group by</div>								
+								<div class="table criteria-table">
+									<div class="criteria-table-header">
+										<div class="cell criteria-header">
+											All
+										</div>
+										<div class="cell criteria-header">
+											&nbsp;
+										</div>
+									</div>
+									<div class="row">
+										<div class="cell">
+											<input type="checkbox" checked/>
+										</div>
+										<div class="cell">
+											<div>Albania</div>
+										</div>
+									</div>
+									<div class="row criteria-row-event">
+										<div class="cell">
+											<input type="checkbox"/>
+										</div>
+										<div class="cell">
+											<div>France</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="cell">
+											<input type="checkbox"/>
+										</div>
+										<div class="cell">
+											<div>UK</div>
+										</div>
+									</div>
+									<div class="row criteria-row-event">
+										<div class="cell">
+											<input type="checkbox"/>
+										</div>
+										<div class="cell">
+											<div>Italy</div>
+										</div>
+									</div>								
+								</div>
+							</div>
+							
+						</div>
+						<div class="row">
+							<div class="cell content-types criteria">
+								<div class="criteria-title">Content</div>
+								<div class="group-by">Group by</div>													<input type="text" class="criteria-search" placeholder="Add Tags"></input>
+								<div class="table">
+									<div class="row">
+										<div class="cell">
+										 <div class="cancel-2-button"></div>
+										</div>
+										<div class="cell criteria-content" >Sweet Nothing</div>
+									</div>
+								</div>
+								<div class="table">
+									<div class="row">
+										<div class="cell">
+										 <div class="cancel-2-button"></div>
+										</div>
+										<div class="cell criteria-content" >Skyfall</div>
+									</div>
+								</div>
+								<div class="table">
+									<div class="row">
+										<div class="cell">
+										 <div class="cancel-2-button"></div>
+										</div>
+										<div class="cell criteria-content" >Gangnum Style</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="cell content-types criteria">
+								<div class="criteria-title">Provider</div>
+								<div class="group-by">Group by</div>													<input type="text" class="criteria-search" placeholder="Provider Name"></input>
+								<div class="table">
+									<div class="row">
+										<div class="cell">
+										 <div class="cancel-2-button"></div>
+										</div>
+										<div class="cell criteria-content" >Rovio Entertainment Ltd</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="cell">
+					<div class="chart-title">Chart Title</div>
+					<div class="chart-description">This is an annotation explaning why this particular view is rather important</div>
+					<div id="container"></div>
+					<div id="table"></div>
+				</div>
+			</div>
+		</div>
+		<script>
+		fileData = [
+		    {
+		        "name": "Dot-Matrix", 
+		        "sales-data": {
+		            "2013-01-01": 171247, 
+		            "2013-01-02": 175731, 
+		            "2013-01-03": 186295, 
+		            "2013-01-04": 177327, 
+		            "2013-01-05": 188328, 
+		            "2013-01-06": 171000, 
+		            "2013-01-07": 167029, 
+		            "2013-01-08": 187036, 
+		            "2013-01-09": 161462, 
+		            "2013-01-10": 167941, 
+		            "2013-01-11": 169765, 
+		            "2013-01-12": 184414, 
+		            "2013-01-13": 184167, 
+		            "2013-01-14": 168321, 
+		            "2013-01-15": 189297, 
+		            "2013-01-16": 170791, 
+		            "2013-01-17": 177973, 
+		            "2013-01-18": 164559, 
+		            "2013-01-19": 158270, 
+		            "2013-01-20": 176035, 
+		            "2013-01-21": 161006, 
+		            "2013-01-22": 176016, 
+		            "2013-01-23": 152532, 
+		            "2013-01-24": 180329, 
+		            "2013-01-25": 155458, 
+		            "2013-01-26": 182780, 
+		            "2013-01-27": 160246, 
+		            "2013-01-28": 175921, 
+		            "2013-01-29": 162070, 
+		            "2013-01-30": 153216, 
+		            "2013-01-31": 175978, 
+		            "2013-02-01": 188480, 
+		            "2013-02-02": 154812, 
+		            "2013-02-03": 166687, 
+		            "2013-02-04": 181868, 
+		            "2013-02-05": 180462, 
+		            "2013-02-06": 165528, 
+		            "2013-02-07": 157472, 
+		            "2013-02-08": 158897, 
+		            "2013-02-09": 188499, 
+		            "2013-02-10": 164084, 
+		            "2013-02-11": 153539, 
+		            "2013-02-12": 174762, 
+		            "2013-02-13": 176738, 
+		            "2013-02-14": 180614, 
+		            "2013-02-15": 180937, 
+		            "2013-02-16": 174781, 
+		            "2013-02-17": 169860, 
+		            "2013-02-18": 174857, 
+		            "2013-02-19": 160721, 
+		            "2013-02-20": 173565, 
+		            "2013-02-21": 158859, 
+		            "2013-02-22": 177441, 
+		            "2013-02-23": 186504, 
+		            "2013-02-24": 175256, 
+		            "2013-02-25": 152931, 
+		            "2013-02-26": 157852, 
+		            "2013-02-27": 186732, 
+		            "2013-02-28": 186865, 
+		            "2013-03-01": 185877, 
+		            "2013-03-02": 188138, 
+		            "2013-03-03": 153862, 
+		            "2013-03-04": 155952, 
+		            "2013-03-05": 161215, 
+		            "2013-03-06": 170278, 
+		            "2013-03-07": 188081, 
+		            "2013-03-08": 179132, 
+		            "2013-03-09": 182590, 
+		            "2013-03-10": 154147, 
+		            "2013-03-11": 175465, 
+		            "2013-03-12": 156693, 
+		            "2013-03-13": 177194, 
+		            "2013-03-14": 155249, 
+		            "2013-03-15": 186713, 
+		            "2013-03-16": 184604, 
+		            "2013-03-17": 185953, 
+		            "2013-03-18": 159695, 
+		            "2013-03-19": 154014, 
+		            "2013-03-20": 165186, 
+		            "2013-03-21": 169195, 
+		            "2013-03-22": 176662, 
+		            "2013-03-23": 165547, 
+		            "2013-03-24": 185383
+		        }
+		    }, 
+		    {
+		        "name": "Inkjet", 
+		        "sales-data": {
+		            "2013-01-01": 58807, 
+		            "2013-01-02": 67368, 
+		            "2013-01-03": 68467, 
+		            "2013-01-04": 60305, 
+		            "2013-01-05": 63777, 
+		            "2013-01-06": 63574, 
+		            "2013-01-07": 66549, 
+		            "2013-01-08": 67802, 
+		            "2013-01-09": 65282, 
+		            "2013-01-10": 61096, 
+		            "2013-01-11": 61145, 
+		            "2013-01-12": 57337, 
+		            "2013-01-13": 61887, 
+		            "2013-01-14": 57386, 
+		            "2013-01-15": 69083, 
+		            "2013-01-16": 67151, 
+		            "2013-01-17": 56350, 
+		            "2013-01-18": 67872, 
+		            "2013-01-19": 62510, 
+		            "2013-01-20": 66080, 
+		            "2013-01-21": 61754, 
+		            "2013-01-22": 58191, 
+		            "2013-01-23": 63728, 
+		            "2013-01-24": 63231, 
+		            "2013-01-25": 63679, 
+		            "2013-01-26": 69678, 
+		            "2013-01-27": 56140, 
+		            "2013-01-28": 63210, 
+		            "2013-01-29": 63238, 
+		            "2013-01-30": 61278, 
+		            "2013-01-31": 57785, 
+		            "2013-02-01": 63728, 
+		            "2013-02-02": 64904, 
+		            "2013-02-03": 58170, 
+		            "2013-02-04": 69321, 
+		            "2013-02-05": 62153, 
+		            "2013-02-06": 56392, 
+		            "2013-02-07": 56238, 
+		            "2013-02-08": 63567, 
+		            "2013-02-09": 61950, 
+		            "2013-02-10": 63000, 
+		            "2013-02-11": 65856, 
+		            "2013-02-12": 67802, 
+		            "2013-02-13": 64526, 
+		            "2013-02-14": 59367, 
+		            "2013-02-15": 60102, 
+		            "2013-02-16": 59052, 
+		            "2013-02-17": 58408, 
+		            "2013-02-18": 67487, 
+		            "2013-02-19": 69335, 
+		            "2013-02-20": 68684, 
+		            "2013-02-21": 58898, 
+		            "2013-02-22": 69076, 
+		            "2013-02-23": 64750, 
+		            "2013-02-24": 69839, 
+		            "2013-02-25": 59920, 
+		            "2013-02-26": 65184, 
+		            "2013-02-27": 67949, 
+		            "2013-02-28": 61579, 
+		            "2013-03-01": 69391, 
+		            "2013-03-02": 68698, 
+		            "2013-03-03": 68236, 
+		            "2013-03-04": 67284, 
+		            "2013-03-05": 59521, 
+		            "2013-03-06": 67928, 
+		            "2013-03-07": 61145, 
+		            "2013-03-08": 67949, 
+		            "2013-03-09": 57204, 
+		            "2013-03-10": 65926, 
+		            "2013-03-11": 57099, 
+		            "2013-03-12": 69853, 
+		            "2013-03-13": 64764, 
+		            "2013-03-14": 68901, 
+		            "2013-03-15": 59934, 
+		            "2013-03-16": 67711, 
+		            "2013-03-17": 65415, 
+		            "2013-03-18": 58429, 
+		            "2013-03-19": 66353, 
+		            "2013-03-20": 60452, 
+		            "2013-03-21": 65345, 
+		            "2013-03-22": 62111, 
+		            "2013-03-23": 65254, 
+		            "2013-03-24": 66136
+		        }
+		    }, 
+		    {
+		        "name": "Laser", 
+		        "sales-data": {
+		            "2013-01-01": 154384, 
+		            "2013-01-02": 145056, 
+		            "2013-01-03": 137328, 
+		            "2013-01-04": 137584, 
+		            "2013-01-05": 153312, 
+		            "2013-01-06": 141632, 
+		            "2013-01-07": 141328, 
+		            "2013-01-08": 132400, 
+		            "2013-01-09": 155152, 
+		            "2013-01-10": 159104, 
+		            "2013-01-11": 143264, 
+		            "2013-01-12": 135488, 
+		            "2013-01-13": 145328, 
+		            "2013-01-14": 131264, 
+		            "2013-01-15": 157184, 
+		            "2013-01-16": 134656, 
+		            "2013-01-17": 133824, 
+		            "2013-01-18": 128352, 
+		            "2013-01-19": 135936, 
+		            "2013-01-20": 145680, 
+		            "2013-01-21": 156576, 
+		            "2013-01-22": 154752, 
+		            "2013-01-23": 146272, 
+		            "2013-01-24": 142736, 
+		            "2013-01-25": 133728, 
+		            "2013-01-26": 157776, 
+		            "2013-01-27": 152512, 
+		            "2013-01-28": 141744, 
+		            "2013-01-29": 150992, 
+		            "2013-01-30": 153552, 
+		            "2013-01-31": 143280, 
+		            "2013-02-01": 136336, 
+		            "2013-02-02": 145904, 
+		            "2013-02-03": 158320, 
+		            "2013-02-04": 157328, 
+		            "2013-02-05": 137760, 
+		            "2013-02-06": 146400, 
+		            "2013-02-07": 148672, 
+		            "2013-02-08": 152752, 
+		            "2013-02-09": 128720, 
+		            "2013-02-10": 147280, 
+		            "2013-02-11": 147200, 
+		            "2013-02-12": 146864, 
+		            "2013-02-13": 134880, 
+		            "2013-02-14": 139872, 
+		            "2013-02-15": 146720, 
+		            "2013-02-16": 129456, 
+		            "2013-02-17": 129216, 
+		            "2013-02-18": 150208, 
+		            "2013-02-19": 150128, 
+		            "2013-02-20": 152144, 
+		            "2013-02-21": 133072, 
+		            "2013-02-22": 139280, 
+		            "2013-02-23": 137856, 
+		            "2013-02-24": 136672, 
+		            "2013-02-25": 144832, 
+		            "2013-02-26": 156320, 
+		            "2013-02-27": 140992, 
+		            "2013-02-28": 140288, 
+		            "2013-03-01": 129408, 
+		            "2013-03-02": 142032, 
+		            "2013-03-03": 158944, 
+		            "2013-03-04": 130800, 
+		            "2013-03-05": 157136, 
+		            "2013-03-06": 152624, 
+		            "2013-03-07": 155904, 
+		            "2013-03-08": 153568, 
+		            "2013-03-09": 151632, 
+		            "2013-03-10": 133136, 
+		            "2013-03-11": 157728, 
+		            "2013-03-12": 137696, 
+		            "2013-03-13": 151904, 
+		            "2013-03-14": 138384, 
+		            "2013-03-15": 148160, 
+		            "2013-03-16": 137632, 
+		            "2013-03-17": 129920, 
+		            "2013-03-18": 135904, 
+		            "2013-03-19": 147168, 
+		            "2013-03-20": 154912, 
+		            "2013-03-21": 140912, 
+		            "2013-03-22": 129344, 
+		            "2013-03-23": 128704, 
+		            "2013-03-24": 145184
+		        }
+		    }, 
+		    {
+		        "name": "Thermal", 
+		        "sales-data": {
+		            "2013-01-01": 169847, 
+		            "2013-01-02": 150960, 
+		            "2013-01-03": 152830, 
+		            "2013-01-04": 160871, 
+		            "2013-01-05": 167807, 
+		            "2013-01-06": 165767, 
+		            "2013-01-07": 143922, 
+		            "2013-01-08": 155210, 
+		            "2013-01-09": 148597, 
+		            "2013-01-10": 151963, 
+		            "2013-01-11": 137173, 
+		            "2013-01-12": 138822, 
+		            "2013-01-13": 169439, 
+		            "2013-01-14": 145452, 
+		            "2013-01-15": 166158, 
+		            "2013-01-16": 148172, 
+		            "2013-01-17": 169354, 
+		            "2013-01-18": 155907, 
+		            "2013-01-19": 158338, 
+		            "2013-01-20": 165308, 
+		            "2013-01-21": 158644, 
+		            "2013-01-22": 165444, 
+		            "2013-01-23": 139757, 
+		            "2013-01-24": 139077, 
+		            "2013-01-25": 138363, 
+		            "2013-01-26": 161092, 
+		            "2013-01-27": 161534, 
+		            "2013-01-28": 157726, 
+		            "2013-01-29": 147713, 
+		            "2013-01-30": 160225, 
+		            "2013-01-31": 169439, 
+		            "2013-02-01": 148835, 
+		            "2013-02-02": 156417, 
+		            "2013-02-03": 143599, 
+		            "2013-02-04": 138601, 
+		            "2013-02-05": 153901, 
+		            "2013-02-06": 156213, 
+		            "2013-02-07": 160327, 
+		            "2013-02-08": 162486, 
+		            "2013-02-09": 151963, 
+		            "2013-02-10": 145911, 
+		            "2013-02-11": 153561, 
+		            "2013-02-12": 144806, 
+		            "2013-02-13": 162928, 
+		            "2013-02-14": 137768, 
+		            "2013-02-15": 162622, 
+		            "2013-02-16": 159103, 
+		            "2013-02-17": 151963, 
+		            "2013-02-18": 151130, 
+		            "2013-02-19": 158117, 
+		            "2013-02-20": 161823, 
+		            "2013-02-21": 148801, 
+		            "2013-02-22": 157216, 
+		            "2013-02-23": 146336, 
+		            "2013-02-24": 161602, 
+		            "2013-02-25": 166328, 
+		            "2013-02-26": 161109, 
+		            "2013-02-27": 153119, 
+		            "2013-02-28": 140930, 
+		            "2013-03-01": 159579, 
+		            "2013-03-02": 148053, 
+		            "2013-03-03": 159273, 
+		            "2013-03-04": 139264, 
+		            "2013-03-05": 142205, 
+		            "2013-03-06": 156281, 
+		            "2013-03-07": 168759, 
+		            "2013-03-08": 159715, 
+		            "2013-03-09": 154139, 
+		            "2013-03-10": 141984, 
+		            "2013-03-11": 159358, 
+		            "2013-03-12": 140420, 
+		            "2013-03-13": 138295, 
+		            "2013-03-14": 161738, 
+		            "2013-03-15": 142052, 
+		            "2013-03-16": 147900, 
+		            "2013-03-17": 136714, 
+		            "2013-03-18": 136663, 
+		            "2013-03-19": 145707, 
+		            "2013-03-20": 145996, 
+		            "2013-03-21": 156264, 
+		            "2013-03-22": 152524, 
+		            "2013-03-23": 148869, 
+		            "2013-03-24": 156774
+		        }
+		    }, 
+		    {
+		        "name": "Typewriter", 
+		        "sales-data": {
+		            "2013-01-01": 97361, 
+		            "2013-01-02": 98164, 
+		            "2013-01-03": 99583, 
+		            "2013-01-04": 100441, 
+		            "2013-01-05": 100243, 
+		            "2013-01-06": 105094, 
+		            "2013-01-07": 104599, 
+		            "2013-01-08": 105523, 
+		            "2013-01-09": 92290, 
+		            "2013-01-10": 100518, 
+		            "2013-01-11": 109021, 
+		            "2013-01-12": 107173, 
+		            "2013-01-13": 99462, 
+		            "2013-01-14": 99792, 
+		            "2013-01-15": 95612, 
+		            "2013-01-16": 104313, 
+		            "2013-01-17": 93258, 
+		            "2013-01-18": 93544, 
+		            "2013-01-19": 105292, 
+		            "2013-01-20": 102773, 
+		            "2013-01-21": 88484, 
+		            "2013-01-22": 109626, 
+		            "2013-01-23": 103565, 
+		            "2013-01-24": 98945, 
+		            "2013-01-25": 89771, 
+		            "2013-01-26": 104148, 
+		            "2013-01-27": 89837, 
+		            "2013-01-28": 102938, 
+		            "2013-01-29": 109956, 
+		            "2013-01-30": 101200, 
+		            "2013-01-31": 98648, 
+		            "2013-02-01": 102454, 
+		            "2013-02-02": 99550, 
+		            "2013-02-03": 91883, 
+		            "2013-02-04": 102410, 
+		            "2013-02-05": 96888, 
+		            "2013-02-06": 93203, 
+		            "2013-02-07": 100650, 
+		            "2013-02-08": 94919, 
+		            "2013-02-09": 89298, 
+		            "2013-02-10": 93973, 
+		            "2013-02-11": 104027, 
+		            "2013-02-12": 109021, 
+		            "2013-02-13": 94292, 
+		            "2013-02-14": 101475, 
+		            "2013-02-15": 102212, 
+		            "2013-02-16": 92356, 
+		            "2013-02-17": 105237, 
+		            "2013-02-18": 104137, 
+		            "2013-02-19": 96723, 
+		            "2013-02-20": 109329, 
+		            "2013-02-21": 106183, 
+		            "2013-02-22": 108317, 
+		            "2013-02-23": 105798, 
+		            "2013-02-24": 96723, 
+		            "2013-02-25": 90695, 
+		            "2013-02-26": 97383, 
+		            "2013-02-27": 90453, 
+		            "2013-02-28": 103411, 
+		            "2013-03-01": 97955, 
+		            "2013-03-02": 106370, 
+		            "2013-03-03": 102168, 
+		            "2013-03-04": 105853, 
+		            "2013-03-05": 109527, 
+		            "2013-03-06": 93104, 
+		            "2013-03-07": 90761, 
+		            "2013-03-08": 102025, 
+		            "2013-03-09": 96382, 
+		            "2013-03-10": 97570, 
+		            "2013-03-11": 101167, 
+		            "2013-03-12": 98241, 
+		            "2013-03-13": 103499, 
+		            "2013-03-14": 99979, 
+		            "2013-03-15": 103147, 
+		            "2013-03-16": 102740, 
+		            "2013-03-17": 89639, 
+		            "2013-03-18": 88396, 
+		            "2013-03-19": 89628, 
+		            "2013-03-20": 93291, 
+		            "2013-03-21": 104016, 
+		            "2013-03-22": 92147, 
+		            "2013-03-23": 104148, 
+		            "2013-03-24": 106381
+		        }
+		    }
+		];
+		</script>
+	</body>
+</html>
