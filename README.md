@@ -22,9 +22,8 @@ Questions:
 Notes:
 - used jquery, jquery-ui (heavy, but easy to use), highchart for chart, datatable for table
 - wrote custom widget for timeline (usually will write own dropdown/slider)
-- css classes were used mainly for use, so can transition into production code later
-- normal css classes used, but usually use compass/scss/less
-- Usually if missing from the design, I would ask for color codes/font size/font colors/gradient/images
+- used normal css classes, but usually use compass/scss/less
+- usually asks for color codes/font size/gradient/images assets on a design like this
 - used div tables, div images
-- data was added into the code as is (instead of loaded in), bypassing cross domain issues (just for demo)
+- added data into the code as is (instead of loading the data file), so to bypassing cross domain issues
 - used google images (although if there was a high resolution image required, would use istockphoto/getty images)
