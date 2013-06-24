@@ -33,4 +33,3 @@ Notes:
 - used div tables, div images
 - data was added into the code as is (instead of loaded in), bypassing cross domain issues (just for demo)
 - used google images (although if there was a high resolution image required, would use istockphoto/getty images)
-- all dash convention for naming
