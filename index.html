@@ -10,7 +10,7 @@
 			@import "http://www.datatables.net/release-datatables/media/css/demo_table.css";
 		</style>
 		<script type="text/javascript" language="javascript" src="http://www.datatables.net/release-datatables/media/js/jquery.dataTables.js"></script>
-		<link rel="stylesheet" type="text/css" href="console.css" /> 
+		<link rel="stylesheet" type="text/css" href="console.css" />
 		<script>
 		  currentSlide = 0;
 		  $(function() {
@@ -216,6 +216,10 @@
 		</div>
 		<div class="table header top-tabs">
 			<div class="row">
+				<div class="cell">
+					<div style="color:white;padding:5px;">Printer Sales Report</div>
+				</div>
+				<!--
 				<div class="cell top-tab">
 					Reports
 				</div>
@@ -231,9 +235,10 @@
 				<div class="cell">
 					&nbsp;
 				</div>
+			-->
 			</div>
 		</div>
-		<div class="table header date-filter">
+		<div class="table header date-filter" style="display:none">
 			<div class="row">
 				<div class="cell" style="vertical-align: top;">
 					<div class="table">
@@ -340,7 +345,7 @@
 		</div>
 		<div class="table header">
 			<div class="row">
-				<div class="cell left-pane" style="vertical-align:top;">
+				<div class="cell left-pane" style="vertical-align:top;display:none">
 					<div class="criteria-label">Display</div>
 					<div id="display-tabs">
 					    <input type="radio" id="d1" name="radio2" /><label for="d1">Units</label>

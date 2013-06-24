@@ -1,7 +1,7 @@
 apple-test
 ==========
 
-To Run: Download, then open up console.html with your favorite browser
+To Run: Download, then open up console.html (or index.html for the minimum version) with your favorite browser
 
 Functional widgets:
 - time slider on the top
