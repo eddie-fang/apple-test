@@ -3,7 +3,7 @@ apple-test
 
 To Run: Download, then open up console.html (or index.html for the minimum version) with your favorite browser
 
-Functional widgets:
+Functionalities:
 - time slider on the top
 - tabs switching between day/week/month/quarter/year
 - tabs switching between units/billings
