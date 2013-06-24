@@ -14,14 +14,9 @@ Functional widgets:
 - clicking on the legends in the chart area
 - clicking on the column headers in the table area
 
-Assumptions:
-- clicking on different filters will highlight
-- typing into input text area, then pressing enter, will add a tag
-
 Questions:
 - what are the steps for a presentation on this mockup? (could then focus on those steps/what they show)
 - why is filters mechanic different than content/provider?
-- what happens when you click on the tabs for date, and for display?
 - why was the initial design image so blurry?
 
 Notes:
